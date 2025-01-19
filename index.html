@@ -12,59 +12,78 @@
     <pre id="output"></pre>
 
     <script>
-        async function uploadFile() {
-            const fileInput = document.getElementById('fileInput');
-            if (!fileInput.files.length) {
-                alert('Please select a file');
-                return;
-            }
+      async function uploadFile() {
+    const fileInput = document.getElementById('fileInput');
+    if (!fileInput.files.length) {
+        alert('Please select a file');
+        return;
+    }
 
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.onload = async function(event) {
-                let content = event.target.result;
-                
-                // Modify the content
-                content = content.replace(
-                    /<crs:Group><rdf:Alt><rdf:li xml:lang="x-default">(.*?)<\/rdf:li><\/rdf:Alt><\/crs:Group>/g,
-                    '<crs:Group><rdf:Alt><rdf:li xml:lang="x-default">AnehGaming</rdf:li></rdf:Alt></crs:Group>'
-                );
-                
-                // Display modified content (for debugging)
-                document.getElementById('output').textContent = content;
-                
-                // Upload to GitHub
-                const githubToken = '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'; // Replace with your GitHub token
-                const repoOwner = 'AnehGamingOfficial'; // Replace with your GitHub username
-                const repoName = 'test0'; // Replace with your repository name
-                const filePath = `uploads/${file.name}`; // Adjust path as needed
-                
-                const githubApiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
-                
-                const uploadData = {
-                    message: `Upload modified XMP file: ${file.name}`,
-                    content: btoa(content),
-                    branch: 'main' // Change if necessary
-                };
-                
-                const response = await fetch(githubApiUrl, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${githubToken}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(uploadData)
-                });
-                
-                if (response.ok) {
-                    alert('File uploaded successfully');
-                } else {
-                    alert('Upload failed');
-                }
-            };
-            reader.readAsText(file);
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = async function(event) {
+        let content = event.target.result;
+
+        // Modify the content
+        content = content.replace(
+            /<crs:Group><rdf:Alt><rdf:li xml:lang="x-default">(.*?)<\/rdf:li><\/rdf:Alt><\/crs:Group>/g,
+            '<crs:Group><rdf:Alt><rdf:li xml:lang="x-default">AnehGaming</rdf:li></rdf:Alt></crs:Group>'
+        );
+
+        // Display modified content (for debugging)
+        document.getElementById('output').textContent = content;
+
+        // GitHub credentials
+        const githubToken = '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'; // Replace with your token
+        const repoOwner = 'AnehGamingOfficial';
+        const repoName = 'test0';
+        const filePath = `uploads/${file.name}`;
+
+        const githubApiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+
+        // Check if file exists
+        let sha = null;
+        try {
+            const checkFile = await fetch(githubApiUrl, {
+                headers: { 'Authorization': `Bearer ${githubToken}` }
+            });
+            if (checkFile.ok) {
+                const fileData = await checkFile.json();
+                sha = fileData.sha;
+            }
+        } catch (e) {
+            console.log('File does not exist, proceeding with new upload.');
         }
+
+        // Upload file
+        const uploadData = {
+            message: `Upload modified XMP file: ${file.name}`,
+            content: btoa(unescape(encodeURIComponent(content))),
+            branch: 'main',
+            ...(sha ? { sha } : {})
+        };
+
+        const response = await fetch(githubApiUrl, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${githubToken}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(uploadData)
+        });
+
+        const responseText = await response.text();
+        if (response.ok) {
+            alert('File uploaded successfully');
+        } else {
+            console.log(responseText);
+            alert(`Upload failed: ${responseText}`);
+        }
+    };
+    reader.readAsText(file);
+}
+
     </script>
 </body>
 </html>
