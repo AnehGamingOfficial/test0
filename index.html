@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XMP Upload Panel</title>
+</head>
+<body>
+    <h2>Upload XMP File</h2>
+    <input type="file" id="fileInput" accept=".xmp">
+    <button onclick="uploadFile()">Upload</button>
+    <pre id="output"></pre>
+
+    <script>
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            if (!fileInput.files.length) {
+                alert('Please select a file');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                let content = event.target.result;
+                
+                // Modify the content
+                content = content.replace(
+                    /<crs:Group><rdf:Alt><rdf:li xml:lang="x-default">(.*?)<\/rdf:li><\/rdf:Alt><\/crs:Group>/g,
+                    '<crs:Group><rdf:Alt><rdf:li xml:lang="x-default">AnehGaming</rdf:li></rdf:Alt></crs:Group>'
+                );
+                
+                // Display modified content (for debugging)
+                document.getElementById('output').textContent = content;
+                
+                // Upload to GitHub
+                const githubToken = 'YOUR_GITHUB_TOKEN'; // Replace with your GitHub token
+                const repoOwner = 'YOUR_GITHUB_USERNAME'; // Replace with your GitHub username
+                const repoName = 'YOUR_REPOSITORY_NAME'; // Replace with your repository name
+                const filePath = `uploads/${file.name}`; // Adjust path as needed
+                
+                const githubApiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+                
+                const uploadData = {
+                    message: `Upload modified XMP file: ${file.name}`,
+                    content: btoa(content),
+                    branch: 'main' // Change if necessary
+                };
+                
+                const response = await fetch(githubApiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(uploadData)
+                });
+                
+                if (response.ok) {
+                    alert('File uploaded successfully');
+                } else {
+                    alert('Upload failed');
+                }
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>
