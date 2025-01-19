@@ -191,7 +191,7 @@
      <rdf:li>0, 0</rdf:li>
      <rdf:li>255, 255</rdf:li>
     </rdf:Seq>
-   </crs:ToneCurvePV2012Blue><crs:Name><rdf:Alt><rdf:li xml:lang="x-default">Black Outfit</rdf:li></rdf:Alt></crs:Name><crs:Group><rdf:Alt><rdf:li xml:lang="x-default">Preset DNG & XMP For LightRoom</rdf:li></rdf:Alt></crs:Group>
+   </crs:ToneCurvePV2012Blue><crs:Name><rdf:Alt><rdf:li xml:lang="x-default">Black Outfit</rdf:li></rdf:Alt></crs:Name><crs:Group><rdf:Alt><rdf:li xml:lang="x-default">Preset DNG : XMP For LightRoom</rdf:li></rdf:Alt></crs:Group>
    <crs:Look
     crs:Name=""/>
    <crs:Preset>
